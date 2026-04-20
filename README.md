@@ -12,6 +12,15 @@ L’objectif est de :
 * Extraire le flag
 
 ##  Étape 1 : Préparation de l’environnement
+Outils nécessaires :
+
+- apktool — pour décompiler/recompiler l'APK
+  
+- jadx — pour l'analyse statique Java
+  
+- uber-apk-signer — pour signer l'APK patché
+  
+- adb — pour installer et interagir avec l'application
 
 
 ### Télécharger : `Snake.apk`
