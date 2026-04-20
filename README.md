@@ -22,152 +22,230 @@ L’objectif est de :
 
 Cette étape consiste à analyser le code décompilé de l’application afin de comprendre :
 
-- La logique principale de l’application
-- Les conditions d’exécution du flag
-- Les classes critiques
-- Les protections mises en place
+la logique principale de l’application
 
- ## 1. Analyse avec Jadx-GUI
+les conditions d’exécution du flag
 
-L’APK Snake.apk a été ouvert avec Jadx-GUI afin d’extraire le code source Java.
+les classes critiques
 
-jadx-gui snake.apk
+les protections mises en place
 
-Capture 1 : APK ouvert dans Jadx
-## 2. Structure de l’application
+## 1. Analyse avec Jadx-GUI
 
-Après analyse, on identifie :
+L’APK Snake.apk a été ouvert avec Jadx-GUI afin d’extraire le code source Java et analyser le comportement de l’application.
 
-📦 Package principal : com.pwnsec.snake
-🚀 Classe principale : MainActivity
-
-Capture 2 : Structure du package
-## 3. Logique de MainActivity
-
-La classe MainActivity contient la logique exécutée au démarrage.
-
-🔑 Condition principale
-
-L’application vérifie un Intent Extra :
-
-SNAKE = BigBoss
-
-👉 Si la condition est respectée :
-
-L’application continue son exécution
-Sinon elle bloque certaines fonctionnalités
-Capture 3 : MainActivity
-
-## 4. Accès au stockage
-
-Si la condition est validée :
-
-Chemin utilisé :
-/sdcard/
-ou /storage/emulated/0/
-Recherche :
-📂 dossier Snake
-📄 fichier Skull_Face.yml
-
-## 5. SnakeYAML
-
-Le fichier YAML est parsé avec :
-
-new Yaml();
-
-👉 Conversion YAML → objets Java
-
-⚠️ Risque de désérialisation non sécurisée
-
-## 6. Classe BigBoss
-
-📦 com.pwnsec.snake.BigBoss
-
-Fonctionnement :
-Charge une librairie native :
-System.loadLibrary("native-lib");
-Contient une condition critique :
-input.equals("Snaaaaaaaaaaaaaake")
-## 7. Génération du flag
-
-Si la condition est vraie :
-
-stringFromJNI();
-
-👉 Le flag est généré dynamiquement et affiché dans les logs :
-
-Log.d() / Log.i()
-## 8. Protections identifiées
-🔒 Détection de root
-📱 Détection d’émulateur
-🧪 Détection de Frida
+<img width="960" height="226" alt="image" src="https://github.com/user-attachments/assets/8b13bcf2-648b-47ca-9074-8c2c09b49610" />
 
 
-## Étape 3 : Patch Smali pour bypass des protections
+## 2. Structure générale de l’application
 
-Dans cette étape, l’APK a été décompilé afin d’analyser le code Smali et comprendre les mécanismes internes de l’application, notamment les vérifications liées à l’environnement d’exécution.
+Après analyse, on identifie la structure suivante :
 
-### Outils utilisés
+Package principal : com.pwnsec.snake
 
-Apktool (décompilation / recompilation)
+Classe principale : MainActivity
 
-Jadx (analyse du code Java décompilé)
+<img width="713" height="390" alt="image" src="https://github.com/user-attachments/assets/433c0f53-8b94-4931-8a61-3cf864908ea4" />
 
-VS Code (lecture des fichiers Smali)
 
-ADB (tests sur appareil)
+Classe critique : BigBoss
 
-##  Décompilation de l’APK
+<img width="658" height="400" alt="image" src="https://github.com/user-attachments/assets/76c34006-e611-4893-807e-8a4126d6bac9" />
 
-L’APK a été décompilé afin d’accéder au code source bas niveau (Smali).
+Méthode principale : onCreate()
 
-<img width="488" height="169" alt="image" src="https://github.com/user-attachments/assets/050ede83-a813-442b-b057-3f4ab73f364c" />
+<img width="771" height="405" alt="image" src="https://github.com/user-attachments/assets/c02f06c6-81c1-475a-9320-511f32a7c559" />
 
-## Localiser les zones sensibles
+## 3. Analyse de la méthode onCreate()
 
-- Une analyse a été effectuée dans Jadx afin de trouver les mécanismes de détection.
+La méthode onCreate() de MainActivity représente le point d’entrée principal de l’application Android.
 
-Recherche des mots-clés :
+Lors du lancement de l’application, les opérations suivantes sont exécutées :
+
+🔐 Vérification de sécurité (anti-root)
+
+L’application commence par vérifier si l’appareil est rooté via la fonction :
+
+<img width="319" height="30" alt="image" src="https://github.com/user-attachments/assets/8bcfb203-f695-4c21-a9f9-572a8322a53c" />
+
+- un message est affiché dans les logs (Root detected)
+l’application est fermée immédiatement via :
+finish();
+System.exit(0);
+
+## Vérification des permissions
+
+L’application vérifie ensuite la permission :
+
+<img width="643" height="163" alt="image" src="https://github.com/user-attachments/assets/a09a68ba-ef07-4d39-9604-ed7a5ae6e26e" />
+
+- Cette permission est nécessaire pour accéder au stockage externe et lire le fichier YAML.
+
+🚀 Déclenchement de la logique principale
+
+Si la permission est accordée, la méthode suivante est appelée :
+
+C();
+
+Cette méthode contient la logique principale du challenge.
+
+<img width="593" height="272" alt="image" src="https://github.com/user-attachments/assets/04da864c-db4e-4b3e-8aea-116a1ede8b42" />
+
+
+💀 5. Classe BigBoss (classe critique)
+
+La classe BigBoss est la cible principale du challenge.
+
+Elle contient les éléments suivants :
+
+Chargement d’une librairie native :
+System.loadLibrary("snake")
+Exécution d’une méthode native (JNI)
+Vérification d’une chaîne spécifique :
+Snaaaaaaaaaaaaaake
+
+Si la condition est respectée :
+👉 le flag est généré et affiché dans les logs Android (logcat)
+
+<img width="658" height="400" alt="image" src="https://github.com/user-attachments/assets/76c34006-e611-4893-807e-8a4126d6bac9" />
+
+💣 6. Vulnérabilité identifiée
+
+L’application utilise la librairie SnakeYAML pour parser un fichier externe :
+
+Skull_Face.yml
+
+Cette désérialisation est vulnérable (CVE-2022-1471) et permet :
+
+l’instanciation de classes Java arbitraires
+l’exécution de code non prévu par l’application
+
+👉 Cela permet de déclencher la classe BigBoss via un payload YAML.
+
+🛡️ 7. Protections présentes
+
+L’application intègre plusieurs mécanismes anti-reverse :
+
+Détection de root (fichiers su, apps root)
+Détection d’émulateur (propriétés système)
+Détection de Frida (via logique native)
+Fermeture forcée de l’application si environnement suspect
+🎯 8. Conclusion de l’analyse
+
+L’objectif du challenge est de :
+
+contourner les protections anti-reverse
+exploiter la vulnérabilité SnakeYAML
+déclencher l’instanciation de la classe BigBoss
+récupérer le flag via les logs Android
+
+Étape 3 : Patch Smali pour bypass des protections (Root / Emulator / Frida)
+
+Cette étape consiste à modifier le code Smali de l’application afin de contourner les mécanismes de protection anti-reverse engineering.
+
+L’objectif est de neutraliser les vérifications de sécurité pour permettre l’exécution normale de l’application.
+
+## 1. Décompilation de l’APK
+
+L’APK est décompilé avec apktool afin d’accéder au code Smali :
+
+apktool d snake.apk -o snake_smali
+## 2. Accès au code source Smali
+
+Navigation vers le dossier principal :
+
+cd snake_smali/smali/com/pwnsec/snake/
+
+📸 Capture 1 : structure du dossier Smali
+(insérer ici capture)
+
+🔍 3. Identification des protections
+
+Les protections suivantes doivent être recherchées :
+
+Root detection (su, /system/bin/su)
+Emulator detection (ro.hardware, goldfish, emulator)
+Frida detection
+Build tags (test-keys)
+
+👉 Recherche recommandée dans Jadx avant patch :
+
 root
-emulator
-frida
 su
-debug
-📸 Capture à ajouter :
+frida
+emulator
+test-keys
 
-Analyse du code Smali
+📸 Capture 2 : méthode de détection dans Jadx
+(insérer ici capture)
 
-Exploration des fichiers Smali générés.
+💀 4. Analyse des conditions Smali
 
-Chemin :
-smali/com/pwnsec/snake/
-📸 Capture à ajouter :
-<img width="728" height="142" alt="image" src="https://github.com/user-attachments/assets/b54f36aa-defd-4faa-b386-f7b4df504244" />
+Dans le code Smali, les protections sont généralement sous forme de conditions :
 
-Ouverture d’un fichier contenant une condition
-⚙️ Analyse des conditions logiques
+if-eqz → si égal à 0
+if-nez → si différent de 0
 
-Le code Smali contient des instructions de contrôle de flux :
+Exemple :
 
-if-eqz → condition si égal à 0
-if-nez → condition si différent de 0
-goto → saut dans le code
-return → retour de fonction
-📸 Capture à ajouter :
-Exemple de code Smali avec condition (if-eqz ou if-nez)
-🔄 Rebuild de l’application
+if-eqz v0, :safe
+invoke-static {}, Ljava/lang/System;->exit(I)V
 
-L’application a été reconstruite après analyse.
+👉 Ici, si la condition est vraie → l’application se ferme
 
-Commande :
-apktool b snake_smali -o snake_rebuilt.apk
-📸 Capture à ajouter :
-Build réussi sans erreur
-📱 Test de l’application
+🛠️ 5. Méthodes de bypass
+✔ Méthode 1 : Forcer retour FALSE
 
-Installation de l’APK reconstruit pour vérifier le comportement.
+Remplacer la fonction de détection par :
 
-Commande :
-adb install -r snake_rebuilt.apk
-📸 Capture à ajouter :
-Installation réussie sur appareil ou émulateur
+const/4 v0, 0x0
+return v0
+
+👉 Cela signifie :
+
+aucune détection = false
+l’application continue normalement
+✔ Méthode 2 : suppression du bloc dangereux
+
+Supprimer ou neutraliser les lignes :
+
+System.exit(0)
+finish()
+✔ Méthode 3 : bypass conditionnel
+
+Remplacer :
+
+if-eqz v0, :cond_safe
+
+par un saut direct :
+
+goto :cond_safe
+⚙️ 6. Fichiers à patcher
+
+Les modifications doivent être appliquées dans :
+
+MainActivity.smali
+Classes de détection (Root / Emulator / Frida)
+
+📸 Capture 3 : modification Smali avant/après
+(insérer ici capture)
+
+🔁 7. Rebuild de l’APK
+
+Après modification :
+
+apktool b snake_smali -o snake_patched.apk
+🔏 8. Signature de l’APK
+
+L’APK doit être signé avant installation :
+
+apksigner sign --ks mykeystore.jks snake_patched.apk
+📲 9. Installation de l’APK patché
+adb install -r snake_patched.apk
+🎯 10. Résultat attendu
+
+Après patch :
+
+l’application ne se ferme plus
+les protections anti-root sont désactivées
+l’exécution de la logique principale devient possible
